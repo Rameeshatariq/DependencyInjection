@@ -1,8 +1,10 @@
-package com.example.dependencyinjectionapp;
+package com.example.dependencyinjectionapp.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.example.dependencyinjectionapp.R;
 
 public class QuestionDetialsActivity extends AppCompatActivity {
 

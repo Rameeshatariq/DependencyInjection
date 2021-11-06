@@ -1,4 +1,4 @@
-package com.example.dependencyinjectionapp;
+package com.example.dependencyinjectionapp.Model;
 
 import com.google.gson.annotations.SerializedName;
 

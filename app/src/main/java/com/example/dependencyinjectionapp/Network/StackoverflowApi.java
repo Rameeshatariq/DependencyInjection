@@ -1,4 +1,6 @@
-package com.example.dependencyinjectionapp;
+package com.example.dependencyinjectionapp.Network;
+
+import com.example.dependencyinjectionapp.Model.QuestionsListResponseSchema;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

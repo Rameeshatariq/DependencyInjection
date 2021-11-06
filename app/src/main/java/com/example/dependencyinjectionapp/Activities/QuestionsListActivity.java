@@ -1,22 +1,20 @@
-package com.example.dependencyinjectionapp;
+package com.example.dependencyinjectionapp.Activities;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
-import android.text.Layout;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import com.example.dependencyinjectionapp.Adapter.QuestionsAdapter;
+import com.example.dependencyinjectionapp.Constants;
+import com.example.dependencyinjectionapp.Interface.OnQuestionClickListener;
+import com.example.dependencyinjectionapp.Model.Question;
+import com.example.dependencyinjectionapp.Model.QuestionsListResponseSchema;
+import com.example.dependencyinjectionapp.Network.StackoverflowApi;
+import com.example.dependencyinjectionapp.R;
+import com.example.dependencyinjectionapp.Fragment.ServerErrorDialogFragment;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -118,67 +116,5 @@ public class QuestionsListActivity extends AppCompatActivity implements
                 .commitAllowingStateLoss();
     }
 
-
-    /***************  RecyclerView Adapter *******************/
-    public interface OnQuestionClickListener{
-        void onQuestionClicked(Question question);
-
-    }
-
-    public static class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.QuestionViewHolder> {
-
-        private final OnQuestionClickListener mOnQuestionClickListener;
-        private List<Question> mQuestionList = new ArrayList<>(0);
-
-
-        // View holder
-        public class QuestionViewHolder extends RecyclerView.ViewHolder {
-            public TextView mTitle;
-
-            public QuestionViewHolder(@NonNull View itemView) {
-                super(itemView);
-                mTitle = itemView.findViewById(R.id.txt_title);
-
-            }
-        }
-
-        public QuestionsAdapter(OnQuestionClickListener onQuestionClickListener) {
-            mOnQuestionClickListener = onQuestionClickListener;
-        }
-
-        // Binding Data
-        public void bindData(List<Question> questions){
-            mQuestionList = new ArrayList<>(questions);
-            notifyDataSetChanged();
-        }
-
-
-        @NonNull
-        @Override
-        public QuestionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.layout_question_list_item, parent, false);
-            return new QuestionViewHolder(itemView);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull QuestionViewHolder holder, int position) {
-
-            // we will solve this after Question Class configuration with retrofit
-            holder.mTitle.setText(mQuestionList.get(position).getTitle());
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mOnQuestionClickListener.onQuestionClicked(mQuestionList.get(position));
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return mQuestionList.size();
-        }
-
-    }
 
 }
