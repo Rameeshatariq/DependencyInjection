@@ -1,10 +1,8 @@
 package com.example.dependencyinjectionapp.questionslist;
 
-import com.example.dependencyinjectionapp.Model.Question;
+import com.example.dependencyinjectionapp.questions.Question;
 
 import java.util.List;
-import java.util.Observable;
-
 
 
 public interface QuestionsListViewMvc extends ObservableViewMvc<QuestionsListViewMvc.Listener> {

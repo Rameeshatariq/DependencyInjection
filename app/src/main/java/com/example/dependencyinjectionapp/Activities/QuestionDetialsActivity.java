@@ -1,45 +1,43 @@
 package com.example.dependencyinjectionapp.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.LayoutInflater;
-import android.widget.TextView;
 
-import com.example.dependencyinjectionapp.Constants;
+
 import com.example.dependencyinjectionapp.Fragment.ServerErrorDialogFragment;
-import com.example.dependencyinjectionapp.Model.SingleQuestionResponseSchema;
-import com.example.dependencyinjectionapp.Network.StackoverflowApi;
+import com.example.dependencyinjectionapp.Interface.DialogsManager;
+import com.example.dependencyinjectionapp.MyApplication;
 import com.example.dependencyinjectionapp.detailsQuestion.QuestionDetailsViewMVC;
 import com.example.dependencyinjectionapp.detailsQuestion.QuestionDetailsViewMvcImpl;
+import com.example.dependencyinjectionapp.questions.FetchQuestionDetailsUseCase;
+import com.example.dependencyinjectionapp.questions.QuestionWithBody;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-public class QuestionDetialsActivity extends AppCompatActivity implements Callback<SingleQuestionResponseSchema>, QuestionDetailsViewMVC.Listener {
+public class QuestionDetialsActivity extends AppCompatActivity implements
+        QuestionDetailsViewMVC.Listener , FetchQuestionDetailsUseCase.Listener {
 
     public static final String EXTRA_QUESTION_ID = "EXTRA_QUESTION_ID";
 
-    public static void start(Context context, String questionId){
+
+    private DialogsManager mDialogsManager;
+
+
+    public static void start(Context context, String questionId) {
         Intent i = new Intent(context, QuestionDetialsActivity.class);
         i.putExtra(EXTRA_QUESTION_ID, questionId);
         context.startActivity(i);
     }
 
-    private StackoverflowApi stackoverflowApi;
-    private String mQuestionId;
-    private Call<SingleQuestionResponseSchema> mCall;
 
+    private String mQuestionId;
     private QuestionDetailsViewMVC mViewMvc;
 
+    private FetchQuestionDetailsUseCase fetchQuestionDetailsUseCase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,14 +47,18 @@ public class QuestionDetialsActivity extends AppCompatActivity implements Callba
         setContentView(mViewMvc.getRootView());
 
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
 
-        stackoverflowApi = retrofit.create(StackoverflowApi.class);
+        // Networking
+        fetchQuestionDetailsUseCase = ((MyApplication) getApplication()).getCompositionRoot().getfetchQuestionDetailsUseCase();
+
+
+
+
 
         mQuestionId = getIntent().getExtras().getString(EXTRA_QUESTION_ID);
+
+        // Dialog error
+        mDialogsManager = new DialogsManager(getSupportFragmentManager());
 
     }
 
@@ -65,43 +67,38 @@ public class QuestionDetialsActivity extends AppCompatActivity implements Callba
     protected void onStart() {
         super.onStart();
         mViewMvc.registerListener(this);
-        mCall = stackoverflowApi.questionDetails(mQuestionId);
-        mCall.enqueue( this);
+
+        fetchQuestionDetailsUseCase.registerListener(this);
+        fetchQuestionDetailsUseCase.fetchQuestionDetailsAndNotify(mQuestionId);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         mViewMvc.unregisterListener(this);
-        if (mCall != null){
-            mCall.cancel();
-        }
+
+        fetchQuestionDetailsUseCase.unregisterListener(this);
+    }
+
+
+    @Override
+    public void onFetchOfQuestionDetailsSucceeded(QuestionWithBody question) {
+
+        mViewMvc.bindQuestion(question);
     }
 
     @Override
-    public void onResponse(Call<SingleQuestionResponseSchema> call, Response<SingleQuestionResponseSchema> response) {
-        SingleQuestionResponseSchema questionResponseSchema;
+    public void onFetchOfQuestionDetailsFailed() {
 
-        if (response.isSuccessful() && (questionResponseSchema = response.body()) != null){
-
-            String questionBody = questionResponseSchema.getQuestions().getmBody();
-            mViewMvc.bindQuestion(questionResponseSchema.getQuestions());
-
-        }
-        else{
-            onFailure(call, null);
-        }
-    }
-
-    @Override
-    public void onFailure(Call<SingleQuestionResponseSchema> call, Throwable t) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .add(ServerErrorDialogFragment.newInstance(), null)
-                .commitAllowingStateLoss();
-
+        mDialogsManager.showRetainedDialogWithId(ServerErrorDialogFragment.newInstance(), "");
     }
 }
 
 
+// We have done:
 
+// 1- Decoupling UI Logic from Main Activity (QuestionsListActivity)
+// 2- Decoupling Netwoking  Logic from Main Activity
+
+// next Steps:
+// Start Using Dagger for Dependency Injection!  !!!!!

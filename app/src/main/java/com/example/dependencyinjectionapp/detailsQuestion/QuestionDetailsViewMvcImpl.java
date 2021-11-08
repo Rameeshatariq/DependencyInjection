@@ -5,8 +5,8 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.dependencyinjectionapp.Model.QuestionWithBody;
 import com.example.dependencyinjectionapp.R;
+import com.example.dependencyinjectionapp.questions.QuestionWithBody;
 import com.example.dependencyinjectionapp.questionslist.BaseViewMVC;
 
 

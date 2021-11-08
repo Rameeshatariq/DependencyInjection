@@ -1,53 +1,50 @@
 package com.example.dependencyinjectionapp.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 
-
-import com.example.dependencyinjectionapp.Constants;
 import com.example.dependencyinjectionapp.Fragment.ServerErrorDialogFragment;
-import com.example.dependencyinjectionapp.Model.Question;
-import com.example.dependencyinjectionapp.Model.QuestionsListResponseSchema;
-import com.example.dependencyinjectionapp.Network.StackoverflowApi;
+import com.example.dependencyinjectionapp.Interface.DialogsManager;
+import com.example.dependencyinjectionapp.MyApplication;
+import com.example.dependencyinjectionapp.questions.FetchQuestionsListUseCase;
+import com.example.dependencyinjectionapp.questions.Question;
 import com.example.dependencyinjectionapp.questionslist.QuestionsListViewMVCImpl;
 import com.example.dependencyinjectionapp.questionslist.QuestionsListViewMvc;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.List;
+import java.util.Stack;
+
+
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class QuestionsListActivity extends AppCompatActivity implements
-        Callback<QuestionsListResponseSchema>, QuestionsListViewMvc.Listener
-
+        QuestionsListViewMvc.Listener, FetchQuestionsListUseCase.Listener
 {
-
-    private StackoverflowApi mStackoverflowApi;
-    private Call<QuestionsListResponseSchema> mCall;
-
+    private static final int NUM_OF_QUESTIONS_TO_FETCH  = 20;
+    private FetchQuestionsListUseCase fetchQuestionsListUseCase;
     private QuestionsListViewMvc mViewMVC;
 
+    // Dialog Fragments
+    private DialogsManager mDialogsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mViewMVC = new QuestionsListViewMVCImpl(LayoutInflater.from(this), null);
+
         setContentView(mViewMVC.getRootView());
 
+        // Networking
+
+        fetchQuestionsListUseCase = ((MyApplication) getApplication()).getCompositionRoot().getfetchQuestionsListUseCase();
 
 
-        // Initiate Retrofit
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
 
-        mStackoverflowApi = retrofit.create(StackoverflowApi.class);
-
+        // dialog mangaer
+        mDialogsManager = new DialogsManager(getSupportFragmentManager());
 
     }
 
@@ -55,8 +52,10 @@ public class QuestionsListActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
         mViewMVC.registerListener(this);
-        mCall = mStackoverflowApi.lastActiveQuestions(20);
-        mCall.enqueue(this);
+        fetchQuestionsListUseCase.registerListener(this);
+
+        fetchQuestionsListUseCase.fetchLastActiveQuestionsAndNotify(NUM_OF_QUESTIONS_TO_FETCH);
+
 
     }
 
@@ -64,28 +63,23 @@ public class QuestionsListActivity extends AppCompatActivity implements
     protected void onStop() {
         super.onStop();
         mViewMVC.unregisterListener(this);
-        if(mCall !=null){
-            mCall.cancel();
-        }
+
+        fetchQuestionsListUseCase.unregisterListener(this);
+    }
+
+
+    @Override
+    public void onFetchOfQuestionsSucceeded(List<Question> questions) {
+        mViewMVC.bindQuestions(questions);
+
+
     }
 
     @Override
-    public void onResponse(Call<QuestionsListResponseSchema> call, Response<QuestionsListResponseSchema> response) {
-        QuestionsListResponseSchema responseSchema;
-        if(response.isSuccessful() && (responseSchema = response.body()) != null){
-            mViewMVC.bindQuestions(responseSchema.getQuestions());
-        }else{
-            onFailure(call, null);
-        }
-    }
+    public void onFetchOfQuestionsFailed() {
 
-    @Override
-    public void onFailure(Call<QuestionsListResponseSchema> call, Throwable t) {
+        mDialogsManager.showRetainedDialogWithId(ServerErrorDialogFragment.newInstance(), "");
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .add(ServerErrorDialogFragment.newInstance(), null)
-                .commitAllowingStateLoss();
     }
 
 

@@ -1,5 +1,6 @@
 package com.example.dependencyinjectionapp.questionslist;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.dependencyinjectionapp.Model.Question;
 import com.example.dependencyinjectionapp.R;
+import com.example.dependencyinjectionapp.questions.Question;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +86,7 @@ public class QuestionsListViewMVCImpl extends BaseViewMVC <QuestionsListViewMvc.
         }
 
         @Override
-        public void onBindViewHolder(@NonNull QuestionViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull QuestionViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
 
             holder.mTitle.setText(mQuestionList.get(position).getTitle());

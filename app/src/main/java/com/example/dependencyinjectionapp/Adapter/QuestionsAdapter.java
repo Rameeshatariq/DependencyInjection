@@ -1,5 +1,6 @@
 package com.example.dependencyinjectionapp.Adapter;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.dependencyinjectionapp.Interface.OnQuestionClickListener;
-import com.example.dependencyinjectionapp.Model.Question;
 import com.example.dependencyinjectionapp.R;
+import com.example.dependencyinjectionapp.questions.Question;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.Ques
     }
 
     @Override
-    public void onBindViewHolder(@NonNull QuestionViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull QuestionViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         // we will solve this after Question Class configuration with retrofit
         holder.mTitle.setText(mQuestionList.get(position).getTitle());
