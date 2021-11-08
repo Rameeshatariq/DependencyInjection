@@ -1,4 +1,4 @@
-package com.example.dependencyinjectionapp.detailsQuestion;
+package com.example.dependencyinjectionapp.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
@@ -11,11 +11,12 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 
-
 import com.example.dependencyinjectionapp.Constants;
 import com.example.dependencyinjectionapp.Fragment.ServerErrorDialogFragment;
 import com.example.dependencyinjectionapp.Model.SingleQuestionResponseSchema;
 import com.example.dependencyinjectionapp.Network.StackoverflowApi;
+import com.example.dependencyinjectionapp.detailsQuestion.QuestionDetailsViewMVC;
+import com.example.dependencyinjectionapp.detailsQuestion.QuestionDetailsViewMvcImpl;
 
 import retrofit2.Call;
 import retrofit2.Callback;
